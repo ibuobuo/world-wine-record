@@ -9,7 +9,7 @@ export default function WorldWineRecordApp() {
     const saved = localStorage.getItem("wines");
     return saved ? JSON.parse(saved) : [];
   });
-  const [form, setForm] = useState({ name: "", comment: "", lat: "", lng: "", image: "", type: "赤", location: "" });
+  const [form, setForm] = useState({ name: "", comment: "", lat: "", lng: "", image: null, type: "赤", location: "" });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,13 +31,34 @@ export default function WorldWineRecordApp() {
     try {
       setLoading(true);
       const coords = await getCoordinatesFromLocation(form.location);
-      const newWine = { ...form, lat: coords.lat, lng: coords.lng };
+      let imageData = "";
+      if (form.image) {
+        imageData = await toBase64(form.image);
+      }
+      const newWine = { ...form, lat: coords.lat, lng: coords.lng, image: imageData };
       setWines([...wines, newWine]);
-      setForm({ name: "", comment: "", lat: "", lng: "", image: "", type: "赤", location: "" });
+      setForm({ name: "", comment: "", lat: "", lng: "", image: null, type: "赤", location: "" });
     } catch (error) {
       alert(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleDeleteWine = (index) => {
+    if (window.confirm("この記録を削除しますか？")) {
+      const updatedWines = [...wines];
+      updatedWines.splice(index, 1);
+      setWines(updatedWines);
     }
   };
 
@@ -81,17 +102,23 @@ export default function WorldWineRecordApp() {
           onChange={(e) => setForm({ ...form, location: e.target.value })}
         />
         <input
+          type="file"
+          accept="image/*"
           className="w-full border p-2 rounded mb-2"
-          placeholder="画像URL"
-          value={form.image}
-          onChange={(e) => setForm({ ...form, image: e.target.value })}
+          onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
         />
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50 mr-2"
           onClick={handleAddWine}
           disabled={loading}
         >
           {loading ? "追加中..." : "追加"}
+        </button>
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded"
+          onClick={() => setWines([])}
+        >
+          全て削除
         </button>
       </div>
 
@@ -120,6 +147,13 @@ export default function WorldWineRecordApp() {
                 {wine.comment}
                 <br />
                 {wine.image && <img src={wine.image} alt="wine" className="w-32 mt-1" />}
+                <br />
+                <button
+                  onClick={() => handleDeleteWine(index)}
+                  className="text-sm text-red-500 underline mt-2"
+                >
+                  この記録を削除
+                </button>
               </Popup>
             </Marker>
           ))}
