@@ -16,7 +16,13 @@ const famousWineRegions = [
   { name: "トスカーナ", lat: 43.7711, lng: 11.2486 },
   { name: "リオハ", lat: 42.4650, lng: -2.4480 },
   { name: "ナパ・バレー", lat: 38.5025, lng: -122.2654 },
-  { name: "モーゼル", lat: 49.7330, lng: 6.6833 }
+  { name: "モーゼル", lat: 49.7330, lng: 6.6833 },
+  { name: "マールボロ（NZ）", lat: -41.5134, lng: 173.9574 },
+  { name: "バロッサ・ヴァレー（豪）", lat: -34.5345, lng: 138.9573 },
+  { name: "ケープ・ワインランド（南ア）", lat: -33.9321, lng: 18.8602 },
+  { name: "レバノン ベカー高原", lat: 33.8457, lng: 35.9010 },
+  { name: "チリ マイポ・ヴァレー", lat: -33.6189, lng: -70.6293 },
+  { name: "アルゼンチン メンドーサ", lat: -32.8908, lng: -68.8272 }
 ];
 
 export default function WorldWineRecordApp() {
@@ -112,11 +118,11 @@ export default function WorldWineRecordApp() {
   return (
     <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="border rounded p-4 shadow">
-        <h2 className="text-lg font-bold mb-2">ワインを記録</h2>
-        <input type="text" placeholder="ワイン名" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="border px-2 py-1 mr-2" />
-        <input type="text" placeholder="ブドウ品種（例：カベルネ）" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} className="border px-2 py-1 mr-2" />
-        <input type="text" placeholder="コメント" value={form.comment} onChange={e => setForm({ ...form, comment: e.target.value })} className="border px-2 py-1 mr-2" />
-        <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="border px-2 py-1 mr-2">
+        <h1 className="text-xl font-bold mb-2">ワインを記録</h1>
+        <input className="border p-1 m-1" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="ワイン名" />
+        <input className="border p-1 m-1" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} placeholder="ブドウ品種（例：カベルネ）" />
+        <input className="border p-1 m-1" value={form.comment} onChange={e => setForm({ ...form, comment: e.target.value })} placeholder="コメント" />
+        <select className="border p-1 m-1" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
           <option>赤</option>
           <option>白</option>
           <option>泡</option>
@@ -124,38 +130,33 @@ export default function WorldWineRecordApp() {
           <option>オレンジ</option>
           <option>その他</option>
         </select>
-        <input type="text" placeholder="産地（例：フランス ボルドー）" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="border px-2 py-1 mr-2" />
-        <input type="file" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="mr-2" />
-        <button onClick={handleAddWine} className="bg-blue-500 text-white px-4 py-1">追加</button>
+        <input className="border p-1 m-1 block" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="産地（例：フランス ボルドー）" />
+        <input type="file" className="m-1" onChange={e => setForm({ ...form, image: e.target.files[0] })} />
+        <button onClick={handleAddWine} className="bg-blue-500 text-white px-3 py-1 m-1 rounded">追加</button>
+        <button onClick={() => setWines([])} className="bg-gray-500 text-white px-3 py-1 m-1 rounded">全て削除</button>
 
-        <div className="mt-4">
-          <div className="mb-2">
-            <label className="mr-2">種類で絞り込み:</label>
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border px-2 py-1 mr-2">
-              <option>すべて</option>
-              <option>赤</option>
-              <option>白</option>
-              <option>泡</option>
-              <option>ロゼ</option>
-              <option>オレンジ</option>
-              <option>その他</option>
-            </select>
-          </div>
-
-          <div className="mb-2">
-            <label className="mr-2">品種:</label>
-            <input type="text" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} className="border px-2 py-1 mr-2" />
-          </div>
-
-          <div>
-            <label className="mr-2 block md:inline">産地:</label>
-            <input type="text" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} className="border px-2 py-1" />
-          </div>
+        <div className="mt-2">
+          <label>種類で絞り込み: </label>
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border p-1 m-1">
+            <option>すべて</option>
+            <option>赤</option>
+            <option>白</option>
+            <option>泡</option>
+            <option>ロゼ</option>
+            <option>オレンジ</option>
+            <option>その他</option>
+          </select>
+          <br />
+          <label>品種で絞り込み: </label>
+          <input value={filterGrape} onChange={e => setFilterGrape(e.target.value)} className="border p-1 m-1" />
+          <br />
+          <label>産地で絞り込み: </label>
+          <input value={filterLocation} onChange={e => setFilterLocation(e.target.value)} className="border p-1 m-1" />
         </div>
       </div>
 
       <div className="border rounded p-4 shadow">
-        <MapContainer center={[48.8566, 2.3522]} zoom={2} className="leaflet-container">
+        <MapContainer center={[48.8566, 2.3522]} zoom={2} className="leaflet-container" worldCopyJump={true} maxBounds={[[-90, -180], [90, 180]]}>
           <TileLayer
             url="https://{s}.tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=vGHm48FRyY5iqA40201IfFrej1wI1hPlF9DvCurHGcxIg7mddMEnsgqPdP9ok5Ms"
             attribution="&copy; OpenStreetMap contributors, Tiles &copy; Jawg"
