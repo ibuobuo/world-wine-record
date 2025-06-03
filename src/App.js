@@ -129,22 +129,28 @@ export default function WorldWineRecordApp() {
         <button onClick={handleAddWine} className="bg-blue-500 text-white px-4 py-1">追加</button>
 
         <div className="mt-4">
-          <label className="mr-2">種類で絞り込み:</label>
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border px-2 py-1 mr-2">
-            <option>すべて</option>
-            <option>赤</option>
-            <option>白</option>
-            <option>泡</option>
-            <option>ロゼ</option>
-            <option>オレンジ</option>
-            <option>その他</option>
-          </select>
+          <div className="mb-2">
+            <label className="mr-2">種類で絞り込み:</label>
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border px-2 py-1 mr-2">
+              <option>すべて</option>
+              <option>赤</option>
+              <option>白</option>
+              <option>泡</option>
+              <option>ロゼ</option>
+              <option>オレンジ</option>
+              <option>その他</option>
+            </select>
+          </div>
 
-          <label className="mr-2">品種:</label>
-          <input type="text" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} className="border px-2 py-1 mr-2" />
+          <div className="mb-2">
+            <label className="mr-2">品種:</label>
+            <input type="text" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} className="border px-2 py-1 mr-2" />
+          </div>
 
-          <label className="mr-2">産地:</label>
-          <input type="text" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} className="border px-2 py-1" />
+          <div>
+            <label className="mr-2 block md:inline">産地:</label>
+            <input type="text" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} className="border px-2 py-1" />
+          </div>
         </div>
       </div>
 
