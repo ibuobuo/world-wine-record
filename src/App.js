@@ -29,6 +29,11 @@ const famousWineRegions = [
 const grapeVarieties = ["カベルネ・ソーヴィニヨン", "メルロー", "ピノ・ノワール", "シャルドネ", "ソーヴィニヨン・ブラン", "甲州", "リースリング", "シラー", "グルナッシュ", "ネッビオーロ"];
 const wineTypes = ["赤", "白", "ロゼ", "泡", "オレンジ"];
 
+function getOffsetPosition(index, total, radius = 0.02) {
+  const angle = (2 * Math.PI * index) / total;
+  return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+}
+
 export default function WorldWineRecordApp() {
   const [wines, setWines] = useState(() => {
     const saved = localStorage.getItem("wines");
@@ -111,7 +116,7 @@ export default function WorldWineRecordApp() {
 
       <div className="mb-4 flex flex-wrap gap-2 items-center">
         <input placeholder="ワイン名" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="border p-1" />
-        <input list="grape-options" placeholder="ブドウ品種（例：カベルネ）" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} className="border p-1" />
+        <input list="grape-options" placeholder="ブドウ品種" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} className="border p-1" />
         <datalist id="grape-options">
           {grapeVarieties.map((g, i) => <option key={i} value={g} />)}
         </datalist>
@@ -119,7 +124,7 @@ export default function WorldWineRecordApp() {
         <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="border p-1">
           {wineTypes.map((type, i) => <option key={i} value={type}>{type}</option>)}
         </select>
-        <input list="location-options" placeholder="産地（例：フランス ボルドー）" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="border p-1" />
+        <input list="location-options" placeholder="産地" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="border p-1" />
         <datalist id="location-options">
           {famousWineRegions.map((loc, i) => <option key={i} value={loc.name} />)}
         </datalist>
@@ -159,6 +164,8 @@ export default function WorldWineRecordApp() {
 }
 
 function WorldWineRecordAppCore({ wines, handleDeleteWine }) {
+  const markerMap = {};
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="border rounded p-4 shadow">
@@ -179,31 +186,40 @@ function WorldWineRecordAppCore({ wines, handleDeleteWine }) {
             </Circle>
           ))}
 
-          {wines.map((wine, index) => (
-            <Marker
-              key={index}
-              position={[parseFloat(wine.lat), parseFloat(wine.lng)]}
-              icon={L.icon({
-                iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${wine.type === "白" ? "yellow" : wine.type === "泡" ? "green" : wine.type === "ロゼ" ? "violet" : wine.type === "オレンジ" ? "orange" : "red"}.png`,
-                iconSize: [20, 32],
-                iconAnchor: [10, 32],
-                popupAnchor: [1, -30],
-                shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
-                shadowSize: [32, 32],
-                shadowAnchor: [10, 32]
-              })}
-            >
-              <Popup>
-                <strong>{wine.name}</strong>
-                <br />品種: {wine.grape}
-                <br />種類: {wine.type}
-                <br />{wine.comment}
-                {wine.image && <img src={wine.image} alt="wine" className="w-32 mt-1" />}
-                <br />
-                <button onClick={() => handleDeleteWine(index)} className="text-sm text-red-500 underline mt-2">この記録を削除</button>
-              </Popup>
-            </Marker>
-          ))}
+          {wines.map((wine, index) => {
+            const key = `${wine.lat}-${wine.lng}`;
+            if (!markerMap[key]) markerMap[key] = [];
+            markerMap[key].push(index);
+            const offsetIndex = markerMap[key].indexOf(index);
+            const [offsetLat, offsetLng] = getOffsetPosition(offsetIndex, markerMap[key].length);
+
+            return (
+              <Marker
+                key={index}
+                position={[parseFloat(wine.lat) + offsetLat, parseFloat(wine.lng) + offsetLng]}
+                icon={L.icon({
+                  iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${wine.type === "白" ? "yellow" : wine.type === "泡" ? "green" : wine.type === "ロゼ" ? "violet" : wine.type === "オレンジ" ? "orange" : "red"}.png`,
+                  iconSize: [20, 32],
+                  iconAnchor: [10, 32],
+                  popupAnchor: [1, -30],
+                  shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+                  shadowSize: [32, 32],
+                  shadowAnchor: [10, 32]
+                })}
+              >
+                <Popup>
+                  <strong>{wine.name}</strong>
+                  <br />品種: {wine.grape}
+                  <br />種類: {wine.type}
+                  <br />産地: {wine.location}
+                  <br />コメント: {wine.comment}
+                  {wine.image && <img src={wine.image} alt="wine" className="w-32 mt-1" />}
+                  <br />
+                  <button onClick={() => handleDeleteWine(index)} className="text-sm text-red-500 underline mt-2">この記録を削除</button>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </div>
