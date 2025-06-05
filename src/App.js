@@ -99,21 +99,6 @@ export default function WorldWineRecordApp() {
 
   return (
     <div className="p-4">
-      <div className="mb-2 flex flex-wrap gap-2">
-        <label>種類で絞り込み:
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="ml-2">
-            <option value="すべて">すべて</option>
-            {wineTypes.map((type, i) => <option key={i} value={type}>{type}</option>)}
-          </select>
-        </label>
-        <label>品種で絞り込み:
-          <input className="ml-2 border px-1" placeholder="例: メルロー" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} />
-        </label>
-        <label>産地で絞り込み:
-          <input className="ml-2 border px-1" placeholder="例: ボルドー" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} />
-        </label>
-      </div>
-
       <div className="mb-4 flex flex-wrap gap-2 items-center">
         <input placeholder="ワイン名" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="border p-1" />
         <input list="grape-options" placeholder="ブドウ品種" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} className="border p-1" />
@@ -130,6 +115,21 @@ export default function WorldWineRecordApp() {
         </datalist>
         <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} />
         <button onClick={handleAddWine} className="bg-blue-500 text-white px-2 py-1 rounded">追加</button>
+      </div>
+
+      <div className="mb-2 flex flex-wrap gap-2">
+        <label>種類で絞り込み:
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="ml-2">
+            <option value="すべて">すべて</option>
+            {wineTypes.map((type, i) => <option key={i} value={type}>{type}</option>)}
+          </select>
+        </label>
+        <label>品種で絞り込み:
+          <input list="grape-options" className="ml-2 border px-1" placeholder="例: メルロー" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} />
+        </label>
+        <label>産地で絞り込み:
+          <input list="location-options" className="ml-2 border px-1" placeholder="例: ボルドー" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} />
+        </label>
       </div>
 
       <WorldWineRecordAppCore wines={filteredWines} handleDeleteWine={handleDeleteWine} />
