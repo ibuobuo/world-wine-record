@@ -118,18 +118,21 @@ export default function WorldWineRecordApp() {
       </div>
 
       <div className="mb-4 space-y-2">
-        <label className="block">種類で絞り込み：
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border ml-2">
+        <div>
+          <label className="block">種類で絞り込み：</label>
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border w-full">
             <option value="すべて">すべて</option>
             {wineTypes.map((type, i) => <option key={i} value={type}>{type}</option>)}
           </select>
-        </label>
-        <label className="block">品種で絞り込み：
-          <input list="grape-options" className="border ml-2 px-1" placeholder="例: メルロー" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} />
-        </label>
-        <label className="block">産地で絞り込み：
-          <input list="location-options" className="border ml-2 px-1" placeholder="例: ボルドー" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} />
-        </label>
+        </div>
+        <div>
+          <label className="block">品種で絞り込み：</label>
+          <input list="grape-options" className="border w-full px-1" placeholder="例: メルロー" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} />
+        </div>
+        <div>
+          <label className="block">産地で絞り込み：</label>
+          <input list="location-options" className="border w-full px-1" placeholder="例: ボルドー" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} />
+        </div>
       </div>
 
       <WorldWineRecordAppCore wines={filteredWines} handleDeleteWine={handleDeleteWine} />
