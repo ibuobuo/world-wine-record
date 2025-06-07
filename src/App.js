@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle,} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
@@ -29,7 +29,7 @@ const famousWineRegions = [
 const grapeVarieties = ["カベルネ・ソーヴィニヨン", "メルロー", "ピノ・ノワール", "シャルドネ", "ソーヴィニヨン・ブラン", "甲州", "リースリング", "シラー", "グルナッシュ", "ネッビオーロ"];
 const wineTypes = ["赤", "白", "ロゼ", "泡", "オレンジ"];
 
-function getOffsetPosition(index, total, radius = 0.02) {
+function getOffsetPosition(index, total, radius = 0.002) {
   const angle = (2 * Math.PI * index) / total;
   return [Math.cos(angle) * radius, Math.sin(angle) * radius];
 }
@@ -49,6 +49,10 @@ export default function WorldWineRecordApp() {
   }, [wines]);
 
   const getCoordinatesFromLocation = async (location) => {
+    const matchedRegion = famousWineRegions.find(r => r.name === location);
+    if (matchedRegion) {
+      return { lat: matchedRegion.lat, lng: matchedRegion.lng };
+    }
     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
     const data = await response.json();
     if (data.length === 0) throw new Error("場所が見つかりません");
@@ -98,7 +102,7 @@ export default function WorldWineRecordApp() {
   );
 
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-4">
       <div className="mb-4 flex flex-wrap gap-2 items-center">
         <input placeholder="ワイン名" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="border p-1" />
         <input list="grape-options" placeholder="ブドウ品種" value={form.grape} onChange={e => setForm({ ...form, grape: e.target.value })} className="border p-1" />
@@ -117,21 +121,20 @@ export default function WorldWineRecordApp() {
         <button onClick={handleAddWine} className="bg-blue-500 text-white px-2 py-1 rounded">追加</button>
       </div>
 
-      <div className="mb-4 space-y-2">
-        <div>
-          <label className="block">種類で絞り込み：</label>
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="border w-full">
+      <div>
+        <div>種類で絞り込み：<br />
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
             <option value="すべて">すべて</option>
-            {wineTypes.map((type, i) => <option key={i} value={type}>{type}</option>)}
+            {wineTypes.map((type, index) => (
+              <option key={index} value={type}>{type}</option>
+            ))}
           </select>
         </div>
-        <div>
-          <label className="block">品種で絞り込み：</label>
-          <input list="grape-options" className="border w-full px-1" placeholder="例: メルロー" value={filterGrape} onChange={e => setFilterGrape(e.target.value)} />
+        <div className="mt-2">品種で絞り込み：<br />
+          <input list="grape-options" type="text" placeholder="例: メルロー" value={filterGrape} onChange={(e) => setFilterGrape(e.target.value)} className="border rounded px-2 py-1" />
         </div>
-        <div>
-          <label className="block">産地で絞り込み：</label>
-          <input list="location-options" className="border w-full px-1" placeholder="例: ボルドー" value={filterLocation} onChange={e => setFilterLocation(e.target.value)} />
+        <div className="mt-2">産地で絞り込み：<br />
+          <input list="location-options" type="text" placeholder="例: ボルドー" value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} className="border rounded px-2 py-1" />
         </div>
       </div>
 
@@ -190,16 +193,20 @@ function WorldWineRecordAppCore({ wines, handleDeleteWine }) {
           ))}
 
           {wines.map((wine, index) => {
-            const key = `${wine.lat}-${wine.lng}`;
+            const matchedRegion = famousWineRegions.find(r => r.name === wine.location);
+            const baseLat = matchedRegion ? matchedRegion.lat : parseFloat(wine.lat);
+            const baseLng = matchedRegion ? matchedRegion.lng : parseFloat(wine.lng);
+
+            const key = `${baseLat}-${baseLng}`;
             if (!markerMap[key]) markerMap[key] = [];
             markerMap[key].push(index);
             const offsetIndex = markerMap[key].indexOf(index);
-            const [offsetLat, offsetLng] = getOffsetPosition(offsetIndex, markerMap[key].length);
+            const [offsetLat, offsetLng] = getOffsetPosition(offsetIndex, markerMap[key].length, matchedRegion ? 0.002 : 0.002);
 
             return (
               <Marker
                 key={index}
-                position={[parseFloat(wine.lat) + offsetLat, parseFloat(wine.lng) + offsetLng]}
+                position={[baseLat + offsetLat, baseLng + offsetLng]}
                 icon={L.icon({
                   iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${wine.type === "白" ? "yellow" : wine.type === "泡" ? "green" : wine.type === "ロゼ" ? "violet" : wine.type === "オレンジ" ? "orange" : "red"}.png`,
                   iconSize: [20, 32],
